@@ -53,6 +53,7 @@ Summary of contents:
 - Load pointclouds, meshes, images
 - Visualize in new window and in notebook
 - Save files with desired formats
+- Download models from the internet with `o3d.data`: [https://www.open3d.org/docs/release/python_api/open3d.data.html](https://www.open3d.org/docs/release/python_api/open3d.data.html)
 
 ```python
 import open3d as o3d
@@ -79,6 +80,9 @@ o3d.visualization.draw_geometries([pcd],
                                   front=[0.4257, -0.2125, -0.8795],
                                   lookat=[2.6172, 2.0475, 1.532],
                                   up=[-0.0694, -0.9768, 0.2024])
+
+# We can inspect the docstring of each function with help()
+help(o3d.visualization.draw_geometries)
 
 # In-Notebook web visualizer (but with a worse quality)
 o3d.web_visualizer.draw(pcd,                                  
@@ -114,6 +118,17 @@ print(img)
 # Save file
 # Supported formats: JPG, PNG
 o3d.io.write_image("copy_of_lena.jpg", img)
+
+# We can download data using `o3d.data`; a list of all possible models is provided here:
+# https://www.open3d.org/docs/release/python_api/open3d.data.html
+armadillo = o3d.data.ArmadilloMesh()
+armadillo_mesh = o3d.io.read_triangle_mesh(armadillo.path)
+bunny = o3d.data.BunnyMesh()
+bunny_mesh = o3d.io.read_triangle_mesh(bunny.path)
+
+# Visualize the mesh
+print(bunny_mesh)
+o3d.visualization.draw_geometries([bunny_mesh], window_name='3D Mesh Visualization')
 ```
 
 ## 2. Point Clouds
