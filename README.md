@@ -25,12 +25,12 @@ Also, look at this [Point Cloud Library (PCL)](https://pointclouds.org/) compila
 Table of contents:
 
 - [Open3D Guide](#open3d-guide)
-  - [Setup](#setup)
+  - [Setup and File Structure](#setup-and-file-structure)
   - [1. Introduction and File IO](#1-introduction-and-file-io)
   - [2. Point Clouds](#2-point-clouds)
   - [Authorship](#authorship)
 
-## Setup
+## Setup and File Structure
 
 Install in a Python environment:
 
@@ -38,9 +38,11 @@ Install in a Python environment:
 pip install open3d
 ```
 
-I have copied the used models to [`models/`](./models/). Some of them come from [mxagar/tool_guides/pcl](https://github.com/mxagar/tool_guides/tree/master/pcl), i.e., they are PCD files from PCL &mdash; Open3D supports bith ASCII and binary PCDs, as well as PLYs, among others.
+The repository consists of three main folders:
 
-The guide is organized in notebooks, contained and named chronologically in the folder [`notebooks/`](./notebooks/).
+- [`notebooks/`](./notebooks): Personal notebooks based on the [**Open3D Basic Tutorial**](https://www.open3d.org/docs/latest/tutorial/Basic/index.html); the sections below contain code summaries from those notebooks.
+- [`examples/`](./examples): Official example files from [https://github.com/isl-org/Open3D/tree/main/examples/python](https://github.com/isl-org/Open3D/tree/main/examples/python).
+- [`models/`](./models): Several models both from Open3D repositories as well as from [mxagar/tool_guides/pcl](https://github.com/mxagar/tool_guides/tree/master/pcl), i.e., PCD files from PCL.
 
 ## 1. Introduction and File IO
 
@@ -56,7 +58,16 @@ Summary of contents:
 - Download models from the internet with `o3d.data`: [https://www.open3d.org/docs/release/python_api/open3d.data.html](https://www.open3d.org/docs/release/python_api/open3d.data.html)
 
 ```python
+import sys
+import os
+
+# Add the directory containing 'examples' to the Python path
+notebook_directory = os.getcwd()
+parent_directory = os.path.dirname(notebook_directory)  # Parent directory
+sys.path.append(parent_directory)
+
 import open3d as o3d
+from examples import open3d_example as o3dex
 import numpy as np
 
 # Here, the same file is opened locally
@@ -75,6 +86,7 @@ print(np.asarray(pcd.points))
 #  P, PrtScn    : Take a screen capture.
 #  D            : Take a depth capture.
 #  O            : Take a capture of current rendering settings.
+# IMPORTANT: Press Q to exit the viewer; the notebook cell waits for that!
 o3d.visualization.draw_geometries([pcd],
                                   zoom=0.3412,
                                   front=[0.4257, -0.2125, -0.8795],
@@ -153,7 +165,16 @@ Summary of contents:
 - (Visually) Hidden point removal: `pc.hidden_point_removal(camera, radius)`
 
 ```python
+import sys
+import os
+
+# Add the directory containing 'examples' to the Python path
+notebook_directory = os.getcwd()
+parent_directory = os.path.dirname(notebook_directory)  # Parent directory
+sys.path.append(parent_directory)
+
 import open3d as o3d
+from examples import open3d_example as o3dex
 import numpy as np
 
 ## -- Visualize point cloud
@@ -343,6 +364,8 @@ max_label = labels.max()
 print(f"Point cloud has {max_label + 1} clusters")
 colors = plt.get_cmap("tab20")(labels / (max_label if max_label > 0 else 1))
 colors[labels < 0] = 0
+# Vector3dVector: Convert float64 numpy array of shape (n, 3) to Open3D format
+# https://www.open3d.org/docs/release/python_api/open3d.utility.html#open3d-utility
 pcd.colors = o3d.utility.Vector3dVector(colors[:, :3])
 o3d.visualization.draw_geometries([pcd],
                                   zoom=0.455,
