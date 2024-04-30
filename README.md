@@ -28,6 +28,9 @@ Table of contents:
   - [Setup and File Structure](#setup-and-file-structure)
   - [1. Introduction and File IO](#1-introduction-and-file-io)
   - [2. Point Clouds](#2-point-clouds)
+  - [3. Meshes](#3-meshes)
+  - [4. Transformations](#4-transformations)
+  - [5. Rest of Modules](#5-rest-of-modules)
   - [Authorship](#authorship)
 
 ## Setup and File Structure
@@ -429,6 +432,403 @@ pcd = pcd.select_by_index(pt_map)
 o3d.visualization.draw_geometries([pcd])
 
 ```
+
+## 3. Meshes
+
+Notebook: [`03_Meshes.ipynb`](./notebooks/03_Meshes.ipynb).
+
+Source: [https://www.open3d.org/docs/latest/tutorial/Basic/mesh.html](https://www.open3d.org/docs/latest/tutorial/Basic/mesh.html).
+
+Summary of contents:
+
+- Load and check properties: `read_triangle_mesh()`, `mesh.vertices`, `mesh.triangles`
+- Visualize a mesh: `o3d.visualization.draw_geometries([mesh])`
+- Surface normal estimation: `mesh.compute_vertex_normals()`, `mesh.triangle_normals`
+- Crop a mesh using Numpy slicing
+- Paint a mesh: `mesh1.paint_uniform_color([1, 0.5, 0])`
+- Check properties: `is_edge_manifold`, `is_vertex_manifold`, `is_self_intersecting`, `is_watertight`, `is_orientable`.
+- Mesh filtering:
+  - Average filter: `mesh.filter_smooth_simple(...)`
+  - Laplacian: `mesh.filter_smooth_laplacian(...)`
+  - Taubin: `mesh.filter_smooth_taubin(...)`
+- Sampling mesh surfaces with points:
+  - Uniform: `mesh.sample_points_uniformly(number_of_points=500)`
+  - Poison: `mesh.sample_points_poisson_disk(number_of_points=500, init_factor=5)`
+- Mesh subdivision: `mesh.subdivide_midpoint(...)`, `mesh.subdivide_loop(...)`.
+- Mesh simplification:
+  - Vertex clustering: `mesh.simplify_vertex_clustering(...)`
+  - Mesh decimation: `mesh.simplify_quadric_decimation(...)`
+- Connected components: `mesh.cluster_connected_triangles()`
+
+```python
+import sys
+import os
+import copy
+
+# Add the directory containing 'examples' to the Python path
+notebook_directory = os.getcwd()
+parent_directory = os.path.dirname(notebook_directory)  # Parent directory
+sys.path.append(parent_directory)
+
+import open3d as o3d
+from examples import open3d_example as o3dex
+import numpy as np
+
+## -- Load and Check Properties
+
+# Download data
+dataset = o3d.data.KnotMesh()
+mesh = o3d.io.read_triangle_mesh(dataset.path) # ../models/KnotMesh.ply
+
+print(mesh)
+# Open3D provides direct memory access to these fields via numpy
+print('Vertices:')
+print(np.asarray(mesh.vertices))
+print('Triangles:')
+print(np.asarray(mesh.triangles))
+
+## --  Visualize a mesh
+
+print("Try to render a mesh with normals (exist: " +
+      str(mesh.has_vertex_normals()) + ") and colors (exist: " +
+      str(mesh.has_vertex_colors()) + ")")
+o3d.visualization.draw_geometries([mesh])
+print("A mesh with no normals and no colors does not look good.")
+
+## -- Surface normal estimation
+
+# Rendering is much better with normals
+print("Computing normal and rendering it.")
+mesh.compute_vertex_normals()
+print(np.asarray(mesh.triangle_normals))
+o3d.visualization.draw_geometries([mesh])
+
+## -- Crop mesh using Numpy slicing
+
+print("We make a partial mesh of only the first half triangles.")
+# Make a copy
+mesh1 = copy.deepcopy(mesh)
+# Vector3iVector: Convert int32 numpy array of shape (n, 3) to Open3D format
+# https://www.open3d.org/docs/release/python_api/open3d.utility.html#open3d-utility
+# Take 1/2 of triangle normals and triangles
+mesh1.triangles = o3d.utility.Vector3iVector(
+    np.asarray(mesh1.triangles)[:len(mesh1.triangles) // 2, :])
+mesh1.triangle_normals = o3d.utility.Vector3dVector(
+    np.asarray(mesh1.triangle_normals)[:len(mesh1.triangle_normals) // 2, :])
+print(mesh1.triangles)
+o3d.visualization.draw_geometries([mesh1])
+
+## -- Paint mesh
+
+print("Painting the mesh")
+mesh1.paint_uniform_color([1, 0.706, 0])
+o3d.visualization.draw_geometries([mesh1])
+
+## -- Check properties
+
+def check_properties(name, mesh):
+    mesh.compute_vertex_normals()
+
+    edge_manifold = mesh.is_edge_manifold(allow_boundary_edges=True)
+    edge_manifold_boundary = mesh.is_edge_manifold(allow_boundary_edges=False)
+    vertex_manifold = mesh.is_vertex_manifold()
+    self_intersecting = mesh.is_self_intersecting()
+    watertight = mesh.is_watertight()
+    orientable = mesh.is_orientable()
+
+    print(name)
+    print(f"  edge_manifold:          {edge_manifold}")
+    print(f"  edge_manifold_boundary: {edge_manifold_boundary}")
+    print(f"  vertex_manifold:        {vertex_manifold}")
+    print(f"  self_intersecting:      {self_intersecting}")
+    print(f"  watertight:             {watertight}")
+    print(f"  orientable:             {orientable}")
+
+    geoms = [mesh]
+    if not edge_manifold:
+        edges = mesh.get_non_manifold_edges(allow_boundary_edges=True)
+        geoms.append(o3dex.edges_to_lineset(mesh, edges, (1, 0, 0)))
+    if not edge_manifold_boundary:
+        edges = mesh.get_non_manifold_edges(allow_boundary_edges=False)
+        geoms.append(o3dex.edges_to_lineset(mesh, edges, (0, 1, 0)))
+    if not vertex_manifold:
+        verts = np.asarray(mesh.get_non_manifold_vertices())
+        pcl = o3d.geometry.PointCloud(
+            points=o3d.utility.Vector3dVector(np.asarray(mesh.vertices)[verts]))
+        pcl.paint_uniform_color((0, 0, 1))
+        geoms.append(pcl)
+    if self_intersecting:
+        intersecting_triangles = np.asarray(
+            mesh.get_self_intersecting_triangles())
+        intersecting_triangles = intersecting_triangles[0:1]
+        intersecting_triangles = np.unique(intersecting_triangles)
+        print("  # visualize self-intersecting triangles")
+        triangles = np.asarray(mesh.triangles)[intersecting_triangles]
+        edges = [
+            np.vstack((triangles[:, i], triangles[:, j]))
+            for i, j in [(0, 1), (1, 2), (2, 0)]
+        ]
+        edges = np.hstack(edges).T
+        edges = o3d.utility.Vector2iVector(edges)
+        geoms.append(o3dex.edges_to_lineset(mesh, edges, (1, 0, 1)))
+    o3d.visualization.draw_geometries(geoms, mesh_show_back_face=True)
+
+check_properties('Knot', o3dex.get_knot_mesh())
+#check_properties('Moebius', o3d.geometry.TriangleMesh.create_moebius(twists=1))
+check_properties("non-manifold edge", o3dex.get_non_manifold_edge_mesh())
+check_properties("non-manifold vertex", o3dex.get_non_manifold_vertex_mesh())
+check_properties("open box", o3dex.get_open_box_mesh())
+check_properties("intersecting_boxes", o3dex.get_intersecting_boxes_mesh())
+
+## -- Mesh filtering
+
+# - Average Filtering
+
+# Add noise to vertices in Numpy
+print('create noisy mesh')
+mesh_in = o3dex.get_knot_mesh()
+vertices = np.asarray(mesh_in.vertices)
+noise = 5
+vertices += np.random.uniform(0, noise, size=vertices.shape)
+# Convert Numpy to O3D format
+mesh_in.vertices = o3d.utility.Vector3dVector(vertices)
+mesh_in.compute_vertex_normals()
+o3d.visualization.draw_geometries([mesh_in])
+
+# Average filter
+# The simplest filter is the average filter.
+# A given vertex v_i is given by the average of the adjacent vertices N.
+print('filter with average with 1 iteration')
+mesh_out = mesh_in.filter_smooth_simple(number_of_iterations=1)
+mesh_out.compute_vertex_normals()
+o3d.visualization.draw_geometries([mesh_out])
+
+print('filter with average with 5 iterations')
+mesh_out = mesh_in.filter_smooth_simple(number_of_iterations=5)
+mesh_out.compute_vertex_normals()
+o3d.visualization.draw_geometries([mesh_out])
+
+# - Laplacian
+
+# Normalized weights that relate to the distance of the neighboring vertices
+# The problem with the average and Laplacian filter is that they lead to a shrinkage of the triangle mesh
+print('filter with Laplacian with 10 iterations')
+mesh_out = mesh_in.filter_smooth_laplacian(number_of_iterations=10)
+mesh_out.compute_vertex_normals()
+o3d.visualization.draw_geometries([mesh_out])
+
+print('filter with Laplacian with 50 iterations')
+mesh_out = mesh_in.filter_smooth_laplacian(number_of_iterations=50)
+mesh_out.compute_vertex_normals()
+o3d.visualization.draw_geometries([mesh_out])
+
+# - Taubin filter
+
+# The problem with the average and Laplacian filter is that they lead to a shrinkage of the triangle mesh
+# The application of two Laplacian filters with different strength parameters can prevent the mesh shrinkage
+print('filter with Taubin with 10 iterations')
+mesh_out = mesh_in.filter_smooth_taubin(number_of_iterations=10)
+mesh_out.compute_vertex_normals()
+o3d.visualization.draw_geometries([mesh_out])
+
+print('filter with Taubin with 100 iterations')
+mesh_out = mesh_in.filter_smooth_taubin(number_of_iterations=100)
+mesh_out.compute_vertex_normals()
+o3d.visualization.draw_geometries([mesh_out])
+
+## -- Sampling mesh surfaces with points
+
+mesh = o3d.geometry.TriangleMesh.create_sphere()
+mesh.compute_vertex_normals()
+o3d.visualization.draw_geometries([mesh])
+# Uniform sampling: fast, but can lead to clusters of points
+pcd = mesh.sample_points_uniformly(number_of_points=500)
+o3d.visualization.draw_geometries([pcd])
+
+mesh = o3dex.get_bunny_mesh()
+mesh.compute_vertex_normals()
+o3d.visualization.draw_geometries([mesh])
+# Uniform sampling: fast, but can lead to clusters of points
+pcd = mesh.sample_points_uniformly(number_of_points=50000)
+o3d.visualization.draw_geometries([pcd])
+
+# Uniform sampling can yield clusters of points on the surface, 
+# while a method called Poisson disk sampling can evenly distribute the points on the surface
+# by eliminating redundant (high density) samples.
+# We have 2 options to provide the initial point cloud to remove from
+# 1) Default via the parameter init_factor: 
+# The method first samples uniformly a point cloud from the mesh 
+# with init_factor x number_of_points and uses this for the elimination.
+mesh = o3d.geometry.TriangleMesh.create_sphere()
+pcd = mesh.sample_points_poisson_disk(number_of_points=500, init_factor=5)
+o3d.visualization.draw_geometries([pcd])
+# 2) One can provide a point cloud and pass it to the sample_points_poisson_disk method.
+# Then, this point cloud is used for elimination.
+pcd = mesh.sample_points_uniformly(number_of_points=2500)
+pcd = mesh.sample_points_poisson_disk(number_of_points=500, pcl=pcd)
+o3d.visualization.draw_geometries([pcd])
+
+mesh = o3dex.get_bunny_mesh()
+pcd = mesh.sample_points_poisson_disk(number_of_points=10000, init_factor=5)
+o3d.visualization.draw_geometries([pcd])
+
+pcd = mesh.sample_points_uniformly(number_of_points=50000)
+pcd = mesh.sample_points_poisson_disk(number_of_points=10000, pcl=pcd)
+o3d.visualization.draw_geometries([pcd])
+
+## -- Mesh subdivision
+
+# In mesh subdivision we divide each triangle into a number of smaller triangles
+# In the simplest case, we compute the midpoint of each side per triangle
+# and divide the triangle into four smaller triangles: subdivide_midpoint.
+mesh = o3d.geometry.TriangleMesh.create_box()
+mesh.compute_vertex_normals()
+print(
+    f'The mesh has {len(mesh.vertices)} vertices and {len(mesh.triangles)} triangles'
+)
+o3d.visualization.draw_geometries([mesh], mesh_show_wireframe=True)
+mesh = mesh.subdivide_midpoint(number_of_iterations=1)
+print(
+    f'After subdivision it has {len(mesh.vertices)} vertices and {len(mesh.triangles)} triangles'
+)
+o3d.visualization.draw_geometries([mesh], mesh_show_wireframe=True)
+
+# Another subdivision method: [Loop1987]
+mesh = o3d.geometry.TriangleMesh.create_sphere()
+mesh.compute_vertex_normals()
+print(
+    f'The mesh has {len(mesh.vertices)} vertices and {len(mesh.triangles)} triangles'
+)
+o3d.visualization.draw_geometries([mesh], mesh_show_wireframe=True)
+mesh = mesh.subdivide_loop(number_of_iterations=2)
+print(
+    f'After subdivision it has {len(mesh.vertices)} vertices and {len(mesh.triangles)} triangles'
+)
+o3d.visualization.draw_geometries([mesh], mesh_show_wireframe=True)
+
+mesh = o3dex.get_knot_mesh()
+mesh.compute_vertex_normals()
+print(
+    f'The mesh has {len(mesh.vertices)} vertices and {len(mesh.triangles)} triangles'
+)
+o3d.visualization.draw_geometries([mesh], mesh_show_wireframe=True)
+mesh = mesh.subdivide_loop(number_of_iterations=1)
+print(
+    f'After subdivision it has {len(mesh.vertices)} vertices and {len(mesh.triangles)} triangles'
+)
+o3d.visualization.draw_geometries([mesh], mesh_show_wireframe=True)
+
+## -- Mesh simplification
+
+# - Vertex clustering
+
+mesh_in = o3dex.get_bunny_mesh()
+mesh_in.compute_vertex_normals()
+print(
+    f'Input mesh has {len(mesh_in.vertices)} vertices and {len(mesh_in.triangles)} triangles'
+)
+o3d.visualization.draw_geometries([mesh_in])
+
+# The vertex clustering method pools all vertices that fall
+# into a voxel of a given size to a single vertex
+# Parameters 
+# - contraction: how the vertices are pooled; o3d.geometry.SimplificationContraction.Average 
+# computes a simple average.
+# - voxel_size
+voxel_size = max(mesh_in.get_max_bound() - mesh_in.get_min_bound()) / 32
+print(f'voxel_size = {voxel_size:e}')
+mesh_smp = mesh_in.simplify_vertex_clustering(
+    voxel_size=voxel_size,
+    contraction=o3d.geometry.SimplificationContraction.Average)
+print(
+    f'Simplified mesh has {len(mesh_smp.vertices)} vertices and {len(mesh_smp.triangles)} triangles'
+)
+o3d.visualization.draw_geometries([mesh_smp])
+
+# Now, the voxel size is 2x
+voxel_size = max(mesh_in.get_max_bound() - mesh_in.get_min_bound()) / 16
+print(f'voxel_size = {voxel_size:e}')
+mesh_smp = mesh_in.simplify_vertex_clustering(
+    voxel_size=voxel_size,
+    contraction=o3d.geometry.SimplificationContraction.Average)
+print(
+    f'Simplified mesh has {len(mesh_smp.vertices)} vertices and {len(mesh_smp.triangles)} triangles'
+)
+o3d.visualization.draw_geometries([mesh_smp])
+
+# - Mesh decimation
+
+# We select a single triangle that minimizes an error metric and removes it.
+# This is repeated until a required number of triangles is achieved.
+# Stopping criterium: target_number_of_triangles 
+mesh_smp = mesh_in.simplify_quadric_decimation(target_number_of_triangles=6500)
+print(
+    f'Simplified mesh has {len(mesh_smp.vertices)} vertices and {len(mesh_smp.triangles)} triangles'
+)
+o3d.visualization.draw_geometries([mesh_smp])
+
+mesh_smp = mesh_in.simplify_quadric_decimation(target_number_of_triangles=1700)
+print(
+    f'Simplified mesh has {len(mesh_smp.vertices)} vertices and {len(mesh_smp.triangles)} triangles'
+)
+o3d.visualization.draw_geometries([mesh_smp])
+
+## -- Connected components
+
+# Spurious triangles added randomly scattered
+print("Generate data")
+mesh = o3dex.get_bunny_mesh().subdivide_midpoint(number_of_iterations=2)
+vert = np.asarray(mesh.vertices)
+min_vert, max_vert = vert.min(axis=0), vert.max(axis=0)
+for _ in range(30):
+    cube = o3d.geometry.TriangleMesh.create_box()
+    cube.scale(0.005, center=cube.get_center())
+    cube.translate(
+        (
+            np.random.uniform(min_vert[0], max_vert[0]),
+            np.random.uniform(min_vert[1], max_vert[1]),
+            np.random.uniform(min_vert[2], max_vert[2]),
+        ),
+        relative=False,
+    )
+    mesh += cube
+mesh.compute_vertex_normals()
+print("Show input mesh")
+o3d.visualization.draw_geometries([mesh])
+
+# Cluster connected components:
+# We can compute the connected components of triangles, i.e., the clusters of triangles which are connected.
+# This is useful in image/3D model reconstruction
+print("Cluster connected triangles")
+with o3d.utility.VerbosityContextManager(
+        o3d.utility.VerbosityLevel.Debug) as cm:
+    triangle_clusters, cluster_n_triangles, cluster_area = (
+        mesh.cluster_connected_triangles())
+triangle_clusters = np.asarray(triangle_clusters)
+cluster_n_triangles = np.asarray(cluster_n_triangles)
+cluster_area = np.asarray(cluster_area)
+
+print("Show mesh with small clusters removed")
+mesh_0 = copy.deepcopy(mesh)
+triangles_to_remove = cluster_n_triangles[triangle_clusters] < 100
+mesh_0.remove_triangles_by_mask(triangles_to_remove)
+o3d.visualization.draw_geometries([mesh_0])
+
+print("Show largest cluster")
+mesh_1 = copy.deepcopy(mesh)
+largest_cluster_idx = cluster_n_triangles.argmax()
+triangles_to_remove = triangle_clusters != largest_cluster_idx
+mesh_1.remove_triangles_by_mask(triangles_to_remove)
+o3d.visualization.draw_geometries([mesh_1])
+```
+
+## 4. Transformations
+
+
+
+## 5. Rest of Modules
+
+
 
 ## Authorship
 
