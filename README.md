@@ -26,6 +26,7 @@ Table of contents:
 
 - [Open3D Guide](#open3d-guide)
   - [Setup and File Structure](#setup-and-file-structure)
+    - [Known Issues](#known-issues)
   - [1. Introduction and File IO](#1-introduction-and-file-io)
   - [2. Point Clouds](#2-point-clouds)
   - [3. Meshes](#3-meshes)
@@ -38,14 +39,31 @@ Table of contents:
 Install in a Python environment:
 
 ```bash
+# I created this guide using version 0.18 (Windows 11) and 0.16.1 (Apple M1)
 pip install open3d
 ```
 
 The repository consists of three main folders:
 
-- [`notebooks/`](./notebooks): Personal notebooks based on the [**Open3D Basic Tutorial**](https://www.open3d.org/docs/latest/tutorial/Basic/index.html); the sections below contain code summaries from those notebooks.
+- [`notebooks/`](./notebooks): Personal notebooks based mainlz on the [**Open3D Basic Tutorial**](https://www.open3d.org/docs/latest/tutorial/Basic/index.html); the sections below contain code summaries from those notebooks.
 - [`examples/`](./examples): Official example files from [https://github.com/isl-org/Open3D/tree/main/examples/python](https://github.com/isl-org/Open3D/tree/main/examples/python).
 - [`models/`](./models): Several models both from Open3D repositories as well as from [mxagar/tool_guides/pcl](https://github.com/mxagar/tool_guides/tree/master/pcl), i.e., PCD files from PCL.
+
+The sections 1-4 contain the most important and basic topics necessary to start using Open3D: File I/O, Point clouds, Meshes and Transformations. Each of the topics has
+
+- a dedicated notebook in [`notebooks/`](./notebooks)
+- and a code summary taken from the associated notebook.
+
+The rest of the topics have also a dedicated notebook, but
+
+- they don't have a dedicated section
+- and their code is mostly only in the notebook.
+
+### Known Issues
+
+:warning: Mac/Apple M1 wheels (latest version to date 0.16.1) cause an OpenGL error when we launch the visualization; if the code is in a script it is not that big of an issue from the UX perspective, but if the code is on a notebook, the kernel crashes and it needs to be restarted.
+
+Github issue: [isl-org/Open3D/issues/1673](https://github.com/isl-org/Open3D/issues/1673).
 
 ## 1. Introduction and File IO
 
@@ -824,7 +842,112 @@ o3d.visualization.draw_geometries([mesh_1])
 
 ## 4. Transformations
 
+Source: [https://www.open3d.org/docs/latest/tutorial/Basic/transformation.html](https://www.open3d.org/docs/latest/tutorial/Basic/transformation.html).
 
+Summary of contents:
+
+- Translate: `mesh.translate()`
+- Rotate: `mesh.rotate()`
+  - `get_rotation_matrix_from_xyz`
+  - `get_rotation_matrix_from_axis_angle`
+  - `get_rotation_matrix_from_quaternion`
+- Scale: `mesh.scale()`
+- General (homogeneous) transformation: `mesh.transform()`
+
+```python
+import sys
+import os
+import copy
+
+# Add the directory containing 'examples' to the Python path
+notebook_directory = os.getcwd()
+parent_directory = os.path.dirname(notebook_directory)  # Parent directory
+sys.path.append(parent_directory)
+
+import open3d as o3d
+from examples import open3d_example as o3dex
+import numpy as np
+
+## -- Translate
+
+# Factory function which creates a mesh coordinate frame
+# Check other factory functions with help(o3d.geometry.TriangleMesh)
+mesh = o3d.geometry.TriangleMesh.create_coordinate_frame()
+# Translate mesh and deepcopy
+mesh_tx = copy.deepcopy(mesh).translate((1.3, 0, 0))
+mesh_ty = copy.deepcopy(mesh).translate((0, 1.3, 0))
+print(f'Center of mesh: {mesh.get_center()}')
+# The method get_center returns the mean of the TriangleMesh vertices.
+# That means that for a coordinate frame created at the origin [0,0,0],
+# get_center will return [0.05167549 0.05167549 0.05167549]
+print(f'Center of mesh tx: {mesh_tx.get_center()}')
+print(f'Center of mesh ty: {mesh_ty.get_center()}')
+o3d.visualization.draw_geometries([mesh, mesh_tx, mesh_ty])
+
+# The method takes a second argument relative that is by default set to True.
+# If set to False, the center of the geometry is translated directly to the position specified
+# in the first argument.
+mesh = o3d.geometry.TriangleMesh.create_coordinate_frame()
+mesh_mv = copy.deepcopy(mesh).translate((2, 2, 2), relative=False)
+print(f'Center of mesh: {mesh.get_center()}')
+print(f'Center of translated mesh: {mesh_mv.get_center()}')
+o3d.visualization.draw_geometries([mesh, mesh_mv])
+
+## -- Rotate
+
+# We pass a rotation matrix R to rotate
+# There are many conversion functions to get R
+# - Convert from Euler angles with get_rotation_matrix_from_xyz (where xyz can also be of the form yzx, zxy, xzy, zyx, and yxz)
+# - Convert from Axis-angle representation with get_rotation_matrix_from_axis_angle
+# - Convert from Quaternions with get_rotation_matrix_from_quaternion
+mesh = o3d.geometry.TriangleMesh.create_coordinate_frame()
+mesh_r = copy.deepcopy(mesh)
+R = mesh.get_rotation_matrix_from_xyz((np.pi / 2, 0, np.pi / 4))
+mesh_r.rotate(R, center=(0, 0, 0))
+o3d.visualization.draw_geometries([mesh, mesh_r])
+
+# The function rotate has a second argument center that is by default set to True.
+# This indicates that the object is first centered prior to applying the rotation
+# and then moved back to its previous center. 
+# If this argument is set to False, then the rotation will be applied directly, 
+# such that the whole geometry is rotated around the coordinate center.
+# This implies that the mesh center can be changed after the rotation.
+mesh = o3d.geometry.TriangleMesh.create_coordinate_frame()
+mesh_r = copy.deepcopy(mesh).translate((2, 0, 0))
+mesh_r.rotate(mesh.get_rotation_matrix_from_xyz((np.pi / 2, 0, np.pi / 4)),
+              center=(0, 0, 0))
+o3d.visualization.draw_geometries([mesh, mesh_r])
+
+## -- Scale
+
+mesh = o3d.geometry.TriangleMesh.create_coordinate_frame()
+mesh_s = copy.deepcopy(mesh).translate((2, 0, 0))
+mesh_s.scale(0.5, center=mesh_s.get_center())
+o3d.visualization.draw_geometries([mesh, mesh_s])
+
+# The scale method also has a second argument center that
+# is set to True by default. If it is set to False,
+# then the object is not centered prior to scaling such that
+# the center of the object can move due to the scaling operation
+mesh = o3d.geometry.TriangleMesh.create_coordinate_frame()
+mesh_s = copy.deepcopy(mesh).translate((2, 1, 0))
+mesh_s.scale(0.5, center=(0, 0, 0))
+o3d.visualization.draw_geometries([mesh, mesh_s])
+
+## -- Transform
+
+# Open3D also supports a general transformation 
+# defined by a 4×4 homogeneous transformation matrix using the method transform.
+mesh = o3d.geometry.TriangleMesh.create_coordinate_frame()
+T = np.eye(4)
+T[:3, :3] = mesh.get_rotation_matrix_from_xyz((0, np.pi / 3, np.pi / 2))
+T[0, 3] = 1
+T[1, 3] = 1.3
+print(T)
+mesh_t = copy.deepcopy(mesh).transform(T)
+o3d.visualization.draw_geometries([mesh, mesh_t])
+
+```
 
 ## 5. Rest of Modules
 
