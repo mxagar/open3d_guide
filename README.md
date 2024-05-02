@@ -1086,7 +1086,6 @@ Summary of contents:
 ### Voxelization
 
 
-
 ## Authorship
 
 I compiled this guide following and modifying the cited resources, so most of it is not a creative original work of mine.
