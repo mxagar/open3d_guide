@@ -983,6 +983,21 @@ Summary of contents:
 
 ### Visualization
 
+Source: [https://www.open3d.org/docs/latest/tutorial/Basic/visualization.html](https://www.open3d.org/docs/latest/tutorial/Basic/visualization.html).
+
+Notebook: [`06_Visualization.ipynb`](./notebooks/06_Visualization.ipynb).
+
+Summary of contents:
+
+- Function `draw_geometries`
+- Store viewpoint: `Ctrl+C`
+- Geometry primitives:
+  - `o3d.geometry.TriangleMesh.create_box`
+  - `o3d.geometry.TriangleMesh.create_sphere`
+  - `o3d.geometry.TriangleMesh.create_cylinder`
+  - `o3d.geometry.TriangleMesh.create_coordinate_frame`
+- Drawing line sets: `o3d.geometry.LineSet`
+
 ### KDTree
 
 ### Working with Numpy
