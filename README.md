@@ -35,6 +35,7 @@ Table of contents:
     - [RGBD Images and Odometry](#rgbd-images-and-odometry)
     - [Visualization](#visualization)
     - [KDTree](#kdtree)
+    - [ICP Registration](#icp-registration)
     - [Working with Numpy](#working-with-numpy)
     - [Tensor](#tensor)
     - [Voxelization](#voxelization)
@@ -1000,7 +1001,24 @@ Summary of contents:
 
 ### KDTree
 
+Source: [https://www.open3d.org/docs/latest/tutorial/Basic/kdtree.html](https://www.open3d.org/docs/latest/tutorial/Basic/kdtree.html).
+
+Notebook: [`07_KDTree.ipynb`](./notebooks/07_KDTree.ipynb).
+
+Summary of contents:
+
+- Build KDTree from point cloud and find & visualize nearest points of a point
+  - `pcd_tree = o3d.geometry.KDTreeFlann(pcd)`: create a KDTree
+  - `pcd_tree.search_knn_vector_3d`: given a point, find the N nearest ones
+  - `pcd_tree.search_radius_vector_3d`: given a point, find the ones within a radius R
+
+### ICP Registration
+
+
+
 ### Working with Numpy
+
+
 
 ### Tensor
 
