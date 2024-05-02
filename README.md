@@ -39,7 +39,6 @@ Table of contents:
     - [Working with Numpy](#working-with-numpy)
     - [Tensor](#tensor)
     - [Voxelization](#voxelization)
-    - [Global Registration](#global-registration)
   - [Authorship](#authorship)
 
 ## Setup and File Structure
@@ -1061,8 +1060,6 @@ The tutorial in the section notebook generates a variant of sync function using 
 ### Tensor
 
 ### Voxelization
-
-### Global Registration
 
 ## Authorship
 
