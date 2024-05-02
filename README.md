@@ -1042,7 +1042,21 @@ Summary of contents:
 
 ### Working with Numpy
 
+Sources: 
 
+- Tutorial: [https://www.open3d.org/docs/latest/tutorial/Basic/working_with_numpy.html](https://www.open3d.org/docs/latest/tutorial/Basic/working_with_numpy.html).
+- Conversion interfaces: [https://www.open3d.org/docs/latest/python_api/open3d.utility.html#open3d-utility](https://www.open3d.org/docs/latest/python_api/open3d.utility.html#open3d-utility).
+
+Notebook: [`09_Numpy.ipynb`](./notebooks/09_Numpy.ipynb).
+
+All data structures in Open3D are natively compatible with a NumPy buffer.
+
+Common interfaces to use O3D and Numpy interchangeably are:
+
+- `o3d.utility.Vector3dVector`; more opetions in [open3d.utility](https://www.open3d.org/docs/latest/python_api/open3d.utility.html#open3d-utility).
+- `np.asarray(pcd.points)`.
+
+The tutorial in the section notebook generates a variant of sync function using NumPy and visualizes the function using Open3D.
 
 ### Tensor
 
