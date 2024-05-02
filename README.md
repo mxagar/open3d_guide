@@ -1059,7 +1059,33 @@ The tutorial in the section notebook generates a variant of sync function using 
 
 ### Tensor
 
+Source: [https://www.open3d.org/docs/latest/tutorial/Basic/tensor.html](https://www.open3d.org/docs/latest/tutorial/Basic/tensor.html).
+
+Notebook: [`10_Tensor.ipynb`](./notebooks/10_Tensor.ipynb).
+
+> Tensor is a “view” of a data Blob with shape, stride, and a data pointer. It is a multidimensional and homogeneous matrix containing elements of single data type. It is used in Open3D to perform numerical operations. It supports GPU operations as well.
+
+Summary of contents:
+
+- Tensor creation
+- Properties of a tensor
+- Copy & device transfer
+- Data types
+- Type casting
+- Numpy I/O with direct memory map
+- PyTorch I/O with DLPack memory map
+- Binary element-wise operations
+- Unary element-wise operations
+- Reduction
+- Slicing, indexing, getitem, and setitem
+- Advanced indexing
+- Logical operations
+- Comparision Operations
+- Nonzero operations
+
 ### Voxelization
+
+
 
 ## Authorship
 
