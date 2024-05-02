@@ -32,6 +32,12 @@ Table of contents:
   - [3. Meshes](#3-meshes)
   - [4. Transformations](#4-transformations)
   - [5. Rest of Modules](#5-rest-of-modules)
+    - [RGBD Images and Odometry](#rgbd-images-and-odometry)
+    - [Visualization](#visualization)
+    - [KDTree](#kdtree)
+    - [Working with Numpy](#working-with-numpy)
+    - [Tensor](#tensor)
+    - [Voxelization](#voxelization)
   - [Authorship](#authorship)
 
 ## Setup and File Structure
@@ -951,7 +957,39 @@ o3d.visualization.draw_geometries([mesh, mesh_t])
 
 ## 5. Rest of Modules
 
+### RGBD Images and Odometry
 
+Sources: 
+
+- [https://www.open3d.org/docs/latest/tutorial/Basic/rgbd_image.html](https://www.open3d.org/docs/latest/tutorial/Basic/rgbd_image.html).
+- [https://www.open3d.org/docs/latest/tutorial/Basic/rgbd_odometry.html](https://www.open3d.org/docs/latest/tutorial/Basic/rgbd_odometry.html).
+
+Notebook: [`05_RGBD_Images.ipynb`](./notebooks/05_RGBD_Images.ipynb)
+
+Summary of contents:
+
+- Redwood dataset: RGB, Depth and Co.
+- RGBD Odometry
+  - Camera parameters: 
+    - `o3d.camera.PinholeCameraIntrinsic`
+    - `o3d.io.read_pinhole_camera_intrinsic`
+  - Read RGBD images:
+    - `o3d.geometry.RGBDImage.create_from_color_and_depth`
+    - `o3d.geometry.PointCloud.create_from_rgbd_image`
+  - Compute odometry from two RGBD image pairs: `o3d.pipelines.odometry.compute_rgbd_odometry`
+    - `o3d.pipelines.odometry.RGBDOdometryJacobianFromColorTerm()`
+    - `o3d.pipelines.odometry.RGBDOdometryJacobianFromHybridTerm()`
+  - Visualize RGBD image pairs
+
+### Visualization
+
+### KDTree
+
+### Working with Numpy
+
+### Tensor
+
+### Voxelization
 
 ## Authorship
 
