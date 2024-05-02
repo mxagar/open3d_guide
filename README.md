@@ -39,6 +39,7 @@ Table of contents:
     - [Working with Numpy](#working-with-numpy)
     - [Tensor](#tensor)
     - [Voxelization](#voxelization)
+    - [Global Registration](#global-registration)
   - [Authorship](#authorship)
 
 ## Setup and File Structure
@@ -1014,7 +1015,30 @@ Summary of contents:
 
 ### ICP Registration
 
+Sources: 
 
+- ICP: [https://www.open3d.org/docs/latest/tutorial/Basic/icp_registration.html](https://www.open3d.org/docs/latest/tutorial/Basic/icp_registration.html).
+- Global registrations: [https://www.open3d.org/docs/latest/tutorial/Advanced/global_registration.html](https://www.open3d.org/docs/latest/tutorial/Advanced/global_registration.html).
+- Colored point cloud registrations: [https://www.open3d.org/docs/latest/tutorial/Advanced/colored_pointcloud_registration.html](https://www.open3d.org/docs/latest/tutorial/Advanced/colored_pointcloud_registration.html).
+
+Notebook: [`08_ICP_Registration.ipynb`](./notebooks/08_ICP_Registration.ipynb).
+
+Summary of contents:
+
+- Prepare Input Data: Source and Target
+- Point-to-point ICP
+  - `o3d.pipelines.registration.registration_icp`
+  - `o3d.pipelines.registration.TransformationEstimationPointToPoint()`
+- Point-to-plane ICP
+  - `o3d.pipelines.registration.TransformationEstimationPointToPlane()`
+
+> This tutorial demonstrates the ICP (Iterative Closest Point) registration algorithm. It has been a mainstay of geometric registration in both research and industry for many years. The input are two point clouds and an initial transformation that roughly aligns the source point cloud to the target point cloud. The output is a refined transformation that tightly aligns the two point clouds. A helper function draw_registration_result visualizes the alignment during the registration process. In this tutorial, we show two ICP variants, the point-to-point ICP and the point-to-plane ICP [Rusinkiewicz2001].
+>
+> Both [ICP registration](https://www.open3d.org/docs/latest/tutorial/Advanced/global_registration.html) and [Colored point cloud registration](https://www.open3d.org/docs/latest/tutorial/Advanced/colored_pointcloud_registration.html) are known as **local registration methods** because they rely on a rough alignment as initialization. Prior to a local registration we need some kind of [**global registration**](https://www.open3d.org/docs/latest/tutorial/Advanced/global_registration.html). This family of algorithms do not require an alignment for initialization. They usually produce less tight alignment results and are used as initialization of the local methods.
+
+**This notebook deals with the local registration approach ICP**: we give a source and target point cloud already aligned and we obtain a more tight alignment.
+
+**IMPORTANT: The point-to-plane ICP algorithm uses point normals; we need to estimate them if they are not available**.
 
 ### Working with Numpy
 
@@ -1023,6 +1047,8 @@ Summary of contents:
 ### Tensor
 
 ### Voxelization
+
+### Global Registration
 
 ## Authorship
 
