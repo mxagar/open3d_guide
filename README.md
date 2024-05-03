@@ -1085,6 +1085,23 @@ Summary of contents:
 
 ### Voxelization
 
+Source: 
+
+- Tutorial: [https://www.open3d.org/docs/latest/tutorial/Advanced/voxelization.html](https://www.open3d.org/docs/latest/tutorial/Advanced/voxelization.html).
+- [`open3d.geometry.VoxelGrid`](https://www.open3d.org/docs/latest/python_api/open3d.geometry.VoxelGrid.html#open3d.geometry.VoxelGrid).
+- [`open3d.geometry.Voxel`](https://www.open3d.org/docs/latest/python_api/open3d.geometry.Voxel.html#open3d.geometry.Voxel)
+
+Notebook: [`11_Voxelization.ipynb`](./notebooks/11_Voxelization.ipynb).
+
+Summary of contents:
+
+- Voxelize from triangle mesh: `o3d.geometry.VoxelGrid.create_from_triangle_mesh`
+- Voxels and their data: `voxel_grid.get_voxels()`
+- Voxel cubes for visualization
+- Create a Voxelmap from the VoxelGrid: A cartesian occupancy map
+- Voxelize from a point cloud: `o3d.geometry.VoxelGrid.create_from_point_cloud`
+- Inclusion test: `voxel_grid.check_if_included`
+- Voxel carving
 
 ## Authorship
 
