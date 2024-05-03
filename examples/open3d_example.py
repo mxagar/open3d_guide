@@ -47,6 +47,12 @@ def get_bunny_mesh():
     return mesh
 
 
+def get_armadillo_mesh():
+    data = o3d.data.ArmadilloMesh()
+    mesh = o3d.io.read_triangle_mesh(data.path)
+    return mesh
+
+
 def get_plane_mesh(height=0.2, width=1):
     mesh = o3d.geometry.TriangleMesh(
         vertices=o3d.utility.Vector3dVector(
