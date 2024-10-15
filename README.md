@@ -72,9 +72,11 @@ The rest of the topics have also a dedicated notebook, but
 
 - Github issue: [isl-org/Open3D/issues/1673](https://github.com/isl-org/Open3D/issues/1673).
 
-:warning: OpenGL GPU support is not provided for AMD chips
+:warning: OpenGL GPU support is not provided for AMD chips (Open3D 0.18); instead of using `open3d.visualization.draw`, we should use `open3d.visualization.draw_geometries`, which is a basic rendering scheme.
 
 - Github issue: [isl-org/Open3D/issues/4852](https://github.com/isl-org/Open3D/issues/4852)
+
+:warning: Headless rendering is not possible for Windows (Open3D 0.18).
 
 ## 1. Introduction and File IO
 
