@@ -52,7 +52,7 @@ pip install open3d
 
 The repository consists of three main folders:
 
-- [`notebooks/`](./notebooks): Personal notebooks based mainlz on the [**Open3D Basic Tutorial**](https://www.open3d.org/docs/latest/tutorial/Basic/index.html); the sections below contain code summaries from those notebooks.
+- [`notebooks/`](./notebooks): Personal notebooks based mainly on the [**Open3D Basic Tutorial**](https://www.open3d.org/docs/latest/tutorial/Basic/index.html); the sections below contain code summaries from those notebooks.
 - [`examples/`](./examples): Official example files from [https://github.com/isl-org/Open3D/tree/main/examples/python](https://github.com/isl-org/Open3D/tree/main/examples/python).
 - [`models/`](./models): Several models both from Open3D repositories as well as from [mxagar/tool_guides/pcl](https://github.com/mxagar/tool_guides/tree/master/pcl), i.e., PCD files from PCL.
 
@@ -70,7 +70,11 @@ The rest of the topics have also a dedicated notebook, but
 
 :warning: Mac/Apple M1 wheels (latest version to date 0.16.1) cause an OpenGL error when we launch the visualization; if the code is in a script it is not that big of an issue from the UX perspective, but if the code is on a notebook, the kernel crashes and it needs to be restarted.
 
-Github issue: [isl-org/Open3D/issues/1673](https://github.com/isl-org/Open3D/issues/1673).
+- Github issue: [isl-org/Open3D/issues/1673](https://github.com/isl-org/Open3D/issues/1673).
+
+:warning: OpenGL GPU support is not provided for AMD chips
+
+- Github issue: [isl-org/Open3D/issues/4852](https://github.com/isl-org/Open3D/issues/4852)
 
 ## 1. Introduction and File IO
 
