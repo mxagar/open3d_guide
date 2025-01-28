@@ -1,0 +1,13 @@
+#
+# Wavefront material file
+# Created in RealityCapture
+# Engine version v1.4.0.117809
+#
+
+newmtl tex_u1_v1
+Kd 1 1 1
+d 1
+Ns 0
+illum 1
+map_Kd tex_u1_v1_diffuse.jpg
+map_Bump tex_u1_v1_normal.jpg
