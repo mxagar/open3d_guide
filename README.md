@@ -22,10 +22,12 @@ Also, look at this [Point Cloud Library (PCL)](https://pointclouds.org/) compila
 - Visualization: normals, coordinate systems, etc.
 - Data structures: KD-tree, voxelmaps and octrees, etc.
 
-Table of contents:
+## Table of Contents
 
 - [Open3D Guide](#open3d-guide)
+  - [Table of Contents](#table-of-contents)
   - [Setup and File Structure](#setup-and-file-structure)
+    - [How to Use the Repository Contents](#how-to-use-the-repository-contents)
     - [Known Issues](#known-issues)
   - [1. Introduction and File IO](#1-introduction-and-file-io)
   - [2. Point Clouds](#2-point-clouds)
@@ -39,16 +41,53 @@ Table of contents:
     - [Working with Numpy](#working-with-numpy)
     - [Tensor](#tensor)
     - [Voxelization](#voxelization)
+  - [5. Use Cases](#5-use-cases)
+    - [3D-2D-3D Projection of a Scene](#3d-2d-3d-projection-of-a-scene)
+    - [Compute Optimum Viewpoints of a 3D Scene](#compute-optimum-viewpoints-of-a-3d-scene)
   - [Authorship](#authorship)
 
 ## Setup and File Structure
 
-Install in a Python environment:
+If you have already a dedicated Python environment, just install Open3D via pip:
 
 ```bash
 # I created this guide using version 0.18 (Windows 11) and 0.16.1 (Apple M1)
 pip install open3d
 ```
+
+If you don't have a dedicated Python environment yest, a quick recipe to getting started by using [conda](https://conda.io/projects/conda/en/latest/index.html) is the following:
+
+```bash
+# Set proxy, if required
+
+# Create environment, e.g., with conda, to control Python version
+conda create -n 3d python=3.10 pip
+conda activate 3d
+
+# Install pip-tools
+python -m pip install -U pip-tools
+
+# Generate pinned requirements.txt
+pip-compile requirements.in
+
+# Sync/Install (missing) pinned requirements
+pip-sync requirements.txt
+
+# Alternatively: you can install pinned requirements with pip, as always
+python -m pip install -r requirements.txt
+
+# If required, add new dependencies to requirements.in and sync
+# i.e., update environment
+pip-compile requirements.in
+pip-sync requirements.txt
+
+# Optional: if you's like to export you final conda environment config
+conda env export > environment.yml
+# Optional: If required, to delete the conda environment
+conda remove --name 3d --all
+```
+
+### How to Use the Repository Contents
 
 The repository consists of three main folders:
 
@@ -56,15 +95,17 @@ The repository consists of three main folders:
 - [`examples/`](./examples): Official example files from [https://github.com/isl-org/Open3D/tree/main/examples/python](https://github.com/isl-org/Open3D/tree/main/examples/python).
 - [`models/`](./models): Several models both from Open3D repositories as well as from [mxagar/tool_guides/pcl](https://github.com/mxagar/tool_guides/tree/master/pcl), i.e., PCD files from PCL.
 
-The sections 1-4 contain the most important and basic topics necessary to start using Open3D: File I/O, Point clouds, Meshes and Transformations. Each of the topics has
+**Sections 1-4** contain the most important and basic topics necessary to start using Open3D: File I/O, Point clouds, Meshes and Transformations. Each of the topics has
 
 - a dedicated notebook in [`notebooks/`](./notebooks)
 - and a code summary taken from the associated notebook.
 
-The rest of the topics have also a dedicated notebook, but
+**Section 5** contains the rest of the topics, which have also a dedicated notebook, but
 
 - they don't have a dedicated section
 - and their code is mostly only in the notebook.
+
+**Section 6** contains specific use cases (or complex examples/solution recipes) I will be adding with time.
 
 ### Known Issues
 
@@ -1108,6 +1149,17 @@ Summary of contents:
 - Voxelize from a point cloud: `o3d.geometry.VoxelGrid.create_from_point_cloud`
 - Inclusion test: `voxel_grid.check_if_included`
 - Voxel carving
+
+
+## 5. Use Cases
+
+### 3D-2D-3D Projection of a Scene
+
+TBD.
+
+### Compute Optimum Viewpoints of a 3D Scene
+
+TBD.
 
 ## Authorship
 
