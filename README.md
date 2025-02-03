@@ -42,8 +42,8 @@ Also, look at this [Point Cloud Library (PCL)](https://pointclouds.org/) compila
     - [Tensor](#tensor)
     - [Voxelization](#voxelization)
   - [5. Use Cases](#5-use-cases)
+    - [Capturing 3D Models with Your Phone](#capturing-3d-models-with-your-phone)
     - [3D-2D-3D Projection of a Scene](#3d-2d-3d-projection-of-a-scene)
-    - [Compute Optimum Viewpoints of a 3D Scene](#compute-optimum-viewpoints-of-a-3d-scene)
   - [Authorship](#authorship)
 
 ## Setup and File Structure
@@ -1153,13 +1153,44 @@ Summary of contents:
 
 ## 5. Use Cases
 
+### Capturing 3D Models with Your Phone
+
+There are many phone apps to capture physical worlds objects which use many technologies:
+
+- Just photos (photogrammetry)
+- LIDAR data (e.g., from the new iPhones)
+- etc.
+
+One possible and free application is [RealityScan](https://www.unrealengine.com/en-US/realityscan), from [Unreal Engine](https://www.unrealengine.com).
+
+Example capture (photogrammetry) with an iPhone SE (2020, iOS 18.2.1): [`models/ikea_cup_reality_scan_iphone/`](./models/ikea_cup_reality_scan_iphone/). The capture could be easily improved, I think it is not characteristic of the quality achievable with RealityScan; however, it is a good benchmark/example for some applications, because it has reconstruction mistakes, such as holes.
+
 ### 3D-2D-3D Projection of a Scene
 
-TBD.
+The notebook [`notebooks/12_3D2D3D_Projections.ipynb`](./notebooks/12_3D2D3D_Projections.ipynb) contains the following topics:
 
-### Compute Optimum Viewpoints of a 3D Scene
+- **Capture RGB and Depth Map Snapshots of a 3D Object**
+- **Reconstruct Pointcloud from RGB + Depth Map + Camera Parameters**
+- **Viewpoint Optimization**
 
-TBD.
+![Reconstructed Pointcloud](./assets/2d3d_reconstruction.png)
+
+The last topic, **Viewpoint Optimization**, contains an approximative heuristic to get a set of viewpoints that optimally cover the complete model.
+
+Indeed it is not enough with being able to run a 3D-2D-3D projection, but we need to know how to navigate the scene and get the optimum set of viewpoints to capture the scene!
+
+The presented method is not thoroughly debugged!
+
+Idea:
+
+- Get an initial set of viewpoints by projecting outwards the voxel centers of a coarse voxel grid.
+- Create a finer voxel grid and go through the initial set of viewpoints in a loop:
+  1. Each loop iteration, compute the priority map: how many fine voxel centers are seen if the camera is set in a viewpoint of the initial set
+  2. Pick the viewpoint with highest fine voxel count
+  3. Mark all fine voxels as seen
+  4. Store viewpoint
+  5. Next iteration (step 1)
+- Loop finishes when all fine voxel centers have been seen.
 
 ## Authorship
 
